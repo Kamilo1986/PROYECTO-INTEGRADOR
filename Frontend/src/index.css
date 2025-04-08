@@ -1,0 +1,296 @@
+/* Estilos globales */
+body {
+  background: #fff; /* Fondo blanco */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Estilos comunes a toda la aplicación */
+h2, h4 {
+  color: #2d3436;
+}
+
+h4 {
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 1rem;
+}
+
+/* Logo */
+.logo {
+  width: 150px; /* Ajusté el tamaño */
+  height: auto;
+  display: block;
+  margin: 0 auto 30px; /* Más espacio debajo */
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos específicos para el Panel de Administración */
+.admin-container {
+  background: #f4f6f9;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.admin-container .text-primary {
+  color: #3498db;
+}
+
+.admin-container .alert-danger {
+  background-color: #e74c3c;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.admin-container h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.admin-container table {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container table th {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.admin-container table td {
+  font-size: 1rem;
+}
+
+.admin-container .list-group-item {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-container .btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.admin-container .btn-primary:hover {
+  background-color: #2980b9;
+}
+
+/* ------------------------------------------ */
+/* Estilos específicos para el Login */
+/* ------------------------------------------ */
+.login-container {
+  background: linear-gradient(135deg, #ff7f50, #ff6347);
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-container .form-container {
+  background: #fff;
+  padding: 30px 25px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.login-container h2 {
+  color: #ff6347;
+  margin-bottom: 20px;
+}
+
+.login-container .btn-primary, .login-container .btn-success {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.login-container .btn-primary:hover {
+  background-color: #ff4500;
+}
+
+.login-container .btn-success:hover {
+  background-color: #ff8c00;
+}
+
+.login-container .form-control {
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+}
+
+/* ------------------------------------------ */
+/* Estilos comunes a todos los formularios */
+/* ------------------------------------------ */
+.form-control {
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.btn-primary, .btn-success {
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #5a4cc9;
+}
+
+.btn-success:hover {
+  background-color: #00b894;
+}
+
+/* Transición de entrada suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------ */
+/* Estilos específicos para el registro */
+/* ------------------------------------------ */
+.register-container {
+  background: #fff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.register-container .form-container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.register-container h1 {
+  color: #3498db;
+  font-size: 1.8rem;
+  margin-bottom: 30px;
+}
+
+.register-container .form-control {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.register-container .btn-primary {
+  background-color: #3498db;
+  border-color: #3498db;
+  color: white;
+}
+
+.register-container .btn-primary:hover {
+  background-color: #2980b9;
+}
+
+.register-container .text-danger, .register-container .text-success {
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.register-container .text-success {
+  color: #28a745;
+}
+
+.register-container .text-danger {
+  color: #e74c3c;
+}
+
+/* ------------------------------------------ */
+/* Estilos específicos para las Reservas */
+/* ------------------------------------------ */
+.card {
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  color: #2d3436;
+}
+
+.card-text {
+  font-size: 1rem;
+  color: #636e72;
+}
+
+.btn {
+  border-radius: 30px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+}
+
+.btn-danger {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c0392b;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #1e7e34;
+}
+
+.text-muted {
+  color: #aaa;
+}
+
+img {
+  border-radius: 10px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    flex-direction: column;
+  }
+
+  .card-body {
+    text-align: center;
+  }
+
+  img {
+    max-width: 100%;
+  }
+}
