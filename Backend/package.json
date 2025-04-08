@@ -1,6 +1,8 @@
 {
   "name": "tu-hotel-backend",
   "version": "1.0.0",
+ "homepage": "https://Kamilo1986.github.io/PROYECTO-INTEGRADOR"
+,
   "description": "Backend para el sistema de reservas 'Tu Hotel'",
   "main": "server.js",
   "scripts": {

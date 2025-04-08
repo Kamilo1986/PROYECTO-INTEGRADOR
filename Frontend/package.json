@@ -1,6 +1,7 @@
 {
   "name": "tu-hotel-frontend",
   "version": "0.1.0",
+  "homepage": "https://Kamilo1986.github.io/PROYECTO-INTEGRADOR",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
