@@ -70,7 +70,7 @@ const Navbar = () => {
             onClick={() => navigate("/")}
           >
             <img
-              src="/logo.png"
+              src="./logo.png"
               alt="Tu Hotel"
               style={{ width: "50px", marginRight: "10px", borderRadius: "50%" }}
             />
