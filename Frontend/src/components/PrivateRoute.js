@@ -5,9 +5,14 @@ const isTokenExpired = () => {
   const token = localStorage.getItem("token");
   if (!token) return true;
 
-  const { exp } = JSON.parse(atob(token.split('.')[1])); // Decodificar el token
-  const expirationDate = new Date(exp * 1000); // Expira en formato timestamp
-  return expirationDate < new Date();
+  try {
+    const { exp } = JSON.parse(atob(token.split('.')[1])); // Decodificar el token
+    const expirationDate = new Date(exp * 1000); // Expira en formato timestamp
+    return expirationDate < new Date();
+  } catch (e) {
+    console.error("Error al decodificar el token:", e);
+    return true; // Si ocurre un error, considerar el token como expirado
+  }
 };
 
 const PrivateRoute = ({ children, allowedRoles = [] }) => {
@@ -17,7 +22,7 @@ const PrivateRoute = ({ children, allowedRoles = [] }) => {
   try {
     user = JSON.parse(localStorage.getItem("user"));
   } catch (e) {
-    console.error("Error al parsear el usuario desde localStorage");
+    console.error("Error al parsear el usuario desde localStorage", e);
   }
 
   // Si no hay token, el token está expirado, o no se pudo obtener el usuario, redirigir al login

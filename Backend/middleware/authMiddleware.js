@@ -1,6 +1,6 @@
-// middlewares/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
+// Middleware para verificar la autenticación
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
@@ -26,6 +26,7 @@ const authenticate = (req, res, next) => {
 
 // Middleware para verificar si el usuario es admin
 const authorizeAdmin = (req, res, next) => {
+  // Asegúrate de que el usuario tenga el rol de administrador
   if (req.userRole !== 'admin') {
     return res.status(403).json({ message: 'Acceso denegado. Se requiere rol de administrador.' });
   }

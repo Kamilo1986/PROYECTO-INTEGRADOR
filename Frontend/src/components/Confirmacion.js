@@ -1,133 +1,149 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import QRCode from "react-qr-code";
-import config from "../config";
-import Navbar from "../components/Navbar";
+import { useLocation } from "react-router-dom";
+import QRCode from "qrcode";
+import jsPDF from "jspdf";
+import { useState, useEffect } from "react";
 
 const Confirmacion = () => {
   const { state } = useLocation();
-  const navigate = useNavigate();
-  const [roomDetails, setRoomDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [reservationCode, setReservationCode] = useState("");
+  const { booking } = state || {};
 
-  const calculateNights = (checkInDate, checkOutDate) => {
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-    const differenceInTime = checkOut - checkIn;
-    return Math.ceil(differenceInTime / (1000 * 3600 * 24));
-  };
+  // Usar hooks al inicio
+  const [qrCodeUrl, setQrCodeUrl] = useState(null); // Siempre se ejecuta
 
-  const formatDate = (isoDate) => {
-    return new Date(isoDate).toISOString().split("T")[0];
-  };
-
+  // Verificar si booking existe antes de continuar con la lógica
   useEffect(() => {
-    console.log("📦 state recibido en Confirmacion:", state);
-
-    let isMounted = true;
-
-    const fetchRoomDetails = async () => {
-      if (!state?.room_id) {
-        console.error("🚫 No se encontró el ID de la habitación (room_id) en el state.");
-        setErrorMessage("No se pudo obtener la información de la habitación.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`${config.apiUrl}/api/rooms/room/${state.room_id}`);
-        const data = await response.json();
-        if (isMounted && response.ok && data.room) {
-          setRoomDetails(data.room);
-        } 
-      } catch (error) {
-        console.error("Error al obtener detalles de la habitación:", error);
-        setErrorMessage("Error al cargar los detalles de la habitación.");
-      } finally {
-        if (isMounted) setLoading(false);
+    const generateQRCode = async () => {
+      if (booking) {
+        try {
+          const qrCode = await QRCode.toDataURL(booking.reservation_code, {
+            errorCorrectionLevel: 'H',
+            type: 'image/png',
+            width: 100,
+          });
+          setQrCodeUrl(qrCode); // Actualiza el estado con la URL del QR
+        } catch (error) {
+          console.error("Error generando el código QR:", error);
+        }
       }
     };
 
-    if (!state) {
-      navigate("/");
-    } else {
-      fetchRoomDetails();
-      setReservationCode(state?.reservation_code || "");
+    // Solo ejecutar si booking tiene valor
+    if (booking) {
+      generateQRCode(); 
+    }
+  }, [booking]); // Aseguramos que el efecto solo se ejecute cuando 'booking' cambie
+
+  // Si no hay datos de la reserva, mostrar un mensaje de error
+  if (!booking) {
+    return <div>No se encontraron los datos de la reserva.</div>;
+  }
+
+  // Formatear fechas
+  const checkInDate = new Date(booking.check_in_date).toLocaleDateString();
+  const checkOutDate = new Date(booking.check_out_date).toLocaleDateString();
+
+  // Calcular noches
+  const checkIn = new Date(booking.check_in_date);
+  const checkOut = new Date(booking.check_out_date);
+  const nights = Math.ceil((checkOut - checkIn) / (1000 * 3600 * 24));
+
+  const handleDownloadPDF = async () => {
+    const doc = new jsPDF();
+    doc.text(`Código de Reserva: ${booking.reservation_code}`, 10, 10);
+    doc.text(`Nombre del Huésped: ${booking.guest_name}`, 10, 20);
+    doc.text(`Número Telefónico: ${booking.guest_phone}`, 10, 30);
+    doc.text(`Fecha de Entrada: ${checkInDate}`, 10, 40);
+    doc.text(`Fecha de Salida: ${checkOutDate}`, 10, 50);
+    doc.text(`Noches: ${nights}`, 10, 60);
+    doc.text(`Total a Pagar: ${booking.total_price}`, 10, 70);
+
+    if (qrCodeUrl) {
+      doc.addImage(qrCodeUrl, 'PNG', 10, 80, 50, 50);
     }
 
-    return () => {
-      isMounted = false;
-    };
-  }, [state, navigate]);
+    doc.save('reserva.pdf');
+  };
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Cargando...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!roomDetails && errorMessage) {
-    return (
-      <div className="alert alert-danger text-center" role="alert">
-        {errorMessage}
-      </div>
-    );
-  }
-
-  const { room_type, description, price, image } = roomDetails;
-  const nights = calculateNights(state.check_in_date, state.check_out_date);
-  const total = price * nights;
+  const handlePrint = () => {
+    const printContent = document.querySelector(".container").innerHTML;
+    const newWindow = window.open();
+    newWindow.document.write(printContent);
+    newWindow.document.close();
+    newWindow.print();
+  };
 
   return (
-    <div className="container-fluid p-0" style={{ background: "linear-gradient(to right, #6a11cb, #2575fc)", minHeight: "100vh" }}>
-      <Navbar />
-      <h2 className="text-center mb-5 text-white">Confirmación de la reserva</h2>
+    <div className="container py-3">
+      <h2 className="text-center mb-4 text-primary">Confirmación de Reserva</h2>
 
-      <div className="row justify-content-center">
-        <div className="col-12 col-md-6 col-lg-4">
-          <div className="card shadow-lg border-0 rounded-3">
-            <img
-              src={`/images/${image}`}
-              alt={room_type}
-              className="card-img-top rounded-top"
-              style={{ height: "180px", objectFit: "cover" }}
-            />
-            <div className="card-body">
-              <h5 className="card-title text-primary">{room_type}</h5>
-              <p className="card-text">{description}</p>
-              <p className="card-text fw-bold text-success">Precio por noche: ${price}</p>
+      <div className="card shadow-sm border-0 rounded-3" style={{ maxWidth: "350px", margin: "auto", padding: "10px" }}>
+        <div className="card-body d-flex flex-column">
+          <h5 className="card-title text-primary fw-bold">Reserva Confirmada</h5>
+          <p className="card-text text-muted" style={{ fontSize: "14px" }}>¡Gracias por tu reserva!</p>
 
-              <div className="alert alert-info">
-                <p><strong>Nombre del huésped:</strong> {state.guest_name}</p>
-                <p><strong>Teléfono del huésped:</strong> {state.guest_phone}</p>
-                <p><strong>Fechas:</strong> {formatDate(state.check_in_date)} - {formatDate(state.check_out_date)}</p>
-                <p><strong>Total noches:</strong> {nights}</p>
-                <p><strong>Total:</strong> ${total.toFixed(2)}</p>
-              </div>
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Código de reserva:</strong> {booking.reservation_code || "No disponible"}
+          </div>
 
-              <div className="d-flex justify-content-center">
-                <QRCode value={reservationCode} size={128} />
-              </div>
-              <p className="text-center mt-3 text-muted">Código de reserva: {reservationCode}</p>
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Nombre de la habitación:</strong> {booking.room_name || "No definido"}
+          </div>
 
-              <div className="d-flex justify-content-center mt-4">
-                <a href="https://registro.pse.com.co/PSEUserRegister/" target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                  Ir a Pago
-                </a>
-              </div>
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Descripción:</strong> {booking.room_description || "Descripción no disponible"}
+          </div>
 
-              {errorMessage && (
-                <div className="alert alert-danger mt-4" role="alert">
-                  {errorMessage}
-                </div>
-              )}
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Nombre del huésped:</strong> {booking.guest_name || "No proporcionado"}
+          </div>
+
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Número telefónico:</strong> {booking.guest_phone || "No proporcionado"}
+          </div>
+
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Fecha de entrada:</strong> {checkInDate}
+          </div>
+
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Fecha de salida:</strong> {checkOutDate}
+          </div>
+
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Noches:</strong> {nights || 0}
+          </div>
+
+          <div className="mb-2" style={{ fontSize: "14px" }}>
+            <strong>Total a pagar:</strong> {booking.total_price.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
+          </div>
+
+          <div className="d-flex justify-content-center" style={{ marginBottom: "10px" }}>
+            {booking.image ? (
+              <img
+                src={`${process.env.PUBLIC_URL}/images/${booking.image}`}
+                alt="Habitación reservada"
+                className="img-fluid"
+                style={{ maxWidth: "250px", borderRadius: "10px" }}
+              />
+            ) : (
+              <img
+                src="/images/default.jpg"
+                alt="Imagen de habitación por defecto"
+                className="img-fluid"
+                style={{ maxWidth: "250px", borderRadius: "10px" }}
+              />
+            )}
+          </div>
+
+          {qrCodeUrl && (
+            <div className="d-flex justify-content-center" style={{ marginBottom: "10px" }}>
+              <img src={qrCodeUrl} alt="QR Code" style={{ width: "100px", height: "100px", borderRadius: "5px" }} />
             </div>
+          )}
+
+          <div className="d-flex justify-content-between" style={{ marginTop: "10px" }}>
+            <button className="btn btn-sm btn-success" onClick={handleDownloadPDF}>Descargar PDF</button>
+            <button className="btn btn-sm btn-info" onClick={handlePrint}>Imprimir</button>
           </div>
         </div>
       </div>

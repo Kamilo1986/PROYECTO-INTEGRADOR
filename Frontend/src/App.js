@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Hotels from "./components/hotel";
@@ -6,16 +6,18 @@ import Booking from "./components/Booking";
 import Confirmacion from "./components/Confirmacion";
 import AdminDashboard from "./components/Admin";
 import PrivateRoute from "./components/PrivateRoute";
-import Reservations from "./components/Reservations"; // Lista de reservas
+import Reservations from "./components/Reservations";
+import Navbar from "./components/Navbar";
 
-import Navbar from "./components/Navbar"; // Navbar aquí solo una vez
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
+  const location = useLocation();
+  const hideNavbar = location.pathname === "/login" || location.pathname === "/register";
+
   return (
     <div className="min-h-screen bg-gray-100 p-6 flex flex-col justify-center items-center">
-      {/* Condicionalmente renderizar el Navbar, evitando que se muestre en Login o Register */}
-      {window.location.pathname !== "/login" && window.location.pathname !== "/register" && <Navbar />}
+      {!hideNavbar && <Navbar />}
 
       <Routes>
         {/* Rutas públicas */}

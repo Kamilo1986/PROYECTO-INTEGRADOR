@@ -1,235 +1,277 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
-import config from "../config";
-import Navbar from "./Navbar";
-import { jwtDecode } from "jwt-decode";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const Booking = () => {
   const [rooms, setRooms] = useState([]);
   const [formDataByRoom, setFormDataByRoom] = useState({});
-  const [messageByRoom, setMessageByRoom] = useState({});
+  const [alertByRoom, setAlertByRoom] = useState({});
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const hotelId = 1;
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchAvailableRooms = async () => {
+    const fetchRooms = async () => {
       try {
-        const response = await fetch(`${config.apiUrl}/api/rooms/${hotelId}/available`);
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          console.log("Token no encontrado. No se redirige a login.");
+          return; // Si no hay token, no hacemos nada
+        }
+
+        const response = await fetch("http://localhost:5000/api/rooms", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         const data = await response.json();
 
-        if (response.ok && data.rooms?.length > 0) {
-          setRooms(data.rooms);
+        if (response.ok && Array.isArray(data.rooms)) {
+          const validRooms = data.rooms.filter((room) => room !== null);
+          setRooms(validRooms);
+
           const initialFormData = {};
-          const initialMessages = {};
-          data.rooms.forEach((room) => {
+          const initialAlerts = {};
+
+          validRooms.forEach((room) => {
             initialFormData[room.id] = {
               guest_name: "",
               guest_phone: "",
               check_in_date: "",
               check_out_date: "",
-              num_people: 1,
-              total: 0,
               nights: 0,
+              total_price: 0,
+              price: room.price,
+              hotel_id: room.hotel_id,
+              image: room.image || null,
             };
-            initialMessages[room.id] = "";
+            initialAlerts[room.id] = { show: false, type: "", message: "" };
           });
+
           setFormDataByRoom(initialFormData);
-          setMessageByRoom(initialMessages);
+          setAlertByRoom(initialAlerts);
         } else {
-          setMessageByRoom({ general: "No hay habitaciones disponibles." });
+          console.error("Error al obtener habitaciones:", data.message);
         }
       } catch (error) {
-        console.error("Error al cargar habitaciones:", error);
-        setMessageByRoom({ general: "Error en la solicitud de habitaciones." });
+        console.error("Error al obtener habitaciones:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchAvailableRooms();
-  }, []);
+    fetchRooms();
+  }, [navigate]);
 
-  const calculateDays = (checkIn, checkOut) => {
-    const inDate = new Date(checkIn);
-    const outDate = new Date(checkOut);
-    if (isNaN(inDate) || isNaN(outDate) || outDate <= inDate) return 0;
-    return Math.ceil((outDate - inDate) / (1000 * 3600 * 24));
+  const showAlert = (roomId, type, message) => {
+    console.log(`showAlert - Room ID: ${roomId}, Type: ${type}, Message: ${message}`);
+    setAlertByRoom((prev) => ({
+      ...prev,
+      [roomId]: { show: true, type, message },
+    }));
+    setTimeout(() => {
+      setAlertByRoom((prev) => ({
+        ...prev,
+        [roomId]: { show: false, type: "", message: "" },
+      }));
+    }, 3500);
   };
 
   const handleInputChange = (roomId, field, value) => {
+    console.log(`handleInputChange - Room ID: ${roomId}, Field: ${field}, Value: ${value}`);
     setFormDataByRoom((prev) => {
-      const updated = { ...prev };
-      updated[roomId] = { ...updated[roomId], [field]: value };
+      const prevData = prev[roomId] || {};
+      const updatedData = { ...prevData, [field]: value };
 
       if (field === "check_in_date" || field === "check_out_date") {
-        const { check_in_date, check_out_date } = updated[roomId];
-        const roomPrice = rooms.find((room) => room.id === roomId)?.price;
+        const checkInDate = new Date(updatedData.check_in_date + "T00:00:00");
+        const checkOutDate = new Date(updatedData.check_out_date + "T00:00:00");
 
-        if (check_in_date && check_out_date && roomPrice) {
-          const nights = calculateDays(check_in_date, check_out_date);
-          updated[roomId].total = nights * roomPrice;
-          updated[roomId].nights = nights;
+        if (checkOutDate > checkInDate) {
+          const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 3600 * 24));
+          const total = nights * Number(updatedData.price || 0);
+          updatedData.nights = nights;
+          updatedData.total_price = total;
+        } else {
+          updatedData.nights = 0;
+          updatedData.total_price = 0;
         }
       }
 
-      return updated;
+      return { ...prev, [roomId]: updatedData };
     });
   };
 
-  const handleBooking = (e, roomId) => {
-    e.preventDefault();
+  const handleBooking = async (roomId) => {
     const formData = formDataByRoom[roomId];
+    console.log("handleBooking - Form data:", formData);
 
-    // Validaciones de los campos del formulario
-    if (!formData.guest_name || !formData.guest_phone || !formData.check_in_date || !formData.check_out_date) {
-      setMessageByRoom((prev) => ({ ...prev, [roomId]: "Todos los campos son obligatorios." }));
+    // Validaciones
+    if (!formData.guest_name) {
+      showAlert(roomId, "warning", "El nombre del huésped es obligatorio.");
       return;
     }
 
-    if (!/^[0-9]{10}$/.test(formData.guest_phone)) {
-      setMessageByRoom((prev) => ({ ...prev, [roomId]: "El teléfono debe tener 10 dígitos." }));
+    if (!formData.guest_phone) {
+      showAlert(roomId, "warning", "El número telefónico es obligatorio.");
       return;
     }
 
-    if (formData.check_out_date <= formData.check_in_date) {
-      setMessageByRoom((prev) => ({ ...prev, [roomId]: "La fecha de salida debe ser posterior a la de entrada." }));
+    if (!formData.check_in_date || !formData.check_out_date) {
+      showAlert(roomId, "warning", "Las fechas de entrada y salida son obligatorias.");
       return;
     }
 
-    if (!token) {
-      setMessageByRoom((prev) => ({ ...prev, [roomId]: "Inicia sesión para hacer una reserva." }));
+    if (formData.total_price <= 0) {
+      showAlert(roomId, "warning", "Las fechas o el total son inválidos.");
       return;
     }
 
-    let userId;
+    const datosReserva = {
+      room_id: roomId,
+      hotel_id: formData.hotel_id,
+      guest_name: formData.guest_name,
+      guest_phone: formData.guest_phone,
+      check_in_date: formData.check_in_date,
+      check_out_date: formData.check_out_date,
+      total_price: parseFloat(formData.total_price),
+      user_id: localStorage.getItem("user_id"),
+      image: formData.image || null,
+      status: "pending",
+    };
+
+    console.log("handleBooking - Datos de la reserva a enviar:", datosReserva);
+
     try {
-      const decodedToken = jwtDecode(token);
-      userId = decodedToken.id;
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:5000/api/reservation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(datosReserva),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("Reserva exitosa:", result);
+        showAlert(roomId, "success", "Reserva completada con éxito.");
+        setTimeout(() => {
+          // Aquí ya no necesitamos acceder a result[0], simplemente pasamos el objeto result
+          console.log("Datos de la reserva antes de navegar:", result);
+          navigate("/confirmacion", { state: { booking: result } });
+        }, 2000);
+      } else {
+        showAlert(roomId, "danger", result.message || "Error al reservar.");
+      }
     } catch (error) {
-      setMessageByRoom((prev) => ({ ...prev, [roomId]: "Token inválido. Por favor, inicia sesión de nuevo." }));
-      return;
+      console.error("Error al realizar la reserva:", error);
+      showAlert(roomId, "danger", "Ocurrió un error al realizar la reserva.");
     }
-
-    const reservation_code = generateReservationCode();
-
-    // Preparar la información para pasar al componente de confirmación
-    navigate("/confirmacion", {
-      state: {
-        ...formData,
-        hotel_id: hotelId,
-        room_id: roomId,
-        user_id: userId,
-        reservation_code,
-      },
-    });
-  };
-
-  const generateReservationCode = () => {
-    return (
-      Math.random().toString(36).substring(2, 6).toUpperCase() +
-      Math.floor(1000 + Math.random() * 9000)
-    );
   };
 
   return (
-    <div
-      className="container-fluid p-0"
-      style={{ background: "linear-gradient(to right, #6a11cb, #2575fc)", minHeight: "100vh" }}
-    >
-      <Navbar />
-      <h2 className="text-center mb-5 text-white">Reserva tu habitación</h2>
+    <div className="container py-5">
+      <h2 className="text-center mb-4 text-primary">Reservar habitación</h2>
 
-      {messageByRoom.general && (
-        <div className="alert alert-warning text-center">{messageByRoom.general}</div>
-      )}
+      {loading ? (
+        <div className="text-center">
+          <div className="spinner-border text-primary" role="status" />
+          <p className="mt-3">Cargando habitaciones...</p>
+        </div>
+      ) : rooms.length === 0 ? (
+        <p className="text-center text-danger fs-5">No hay habitaciones disponibles.</p>
+      ) : (
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+          {rooms.map((room) => {
+            const formData = formDataByRoom[room.id] || {};
+            const alert = alertByRoom[room.id] || {};
+            const { guest_name, guest_phone, check_in_date, check_out_date, nights = 0, total_price = 0 } = formData;
 
-      <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
-        {rooms.map((room) => {
-          const formData = formDataByRoom[room.id] || {};
-          const total = formData.total || 0;
-          const nights = formData.nights || 0;
+            return (
+              <div key={room.id} className="col">
+                <div className="card shadow-sm h-100 border-0 rounded-4">
+                  <img
+                    src={room.image ? `${process.env.PUBLIC_URL}/images/${room.image}` : "/images/default.jpg"}
+                    alt={room.room_type || "Habitación"}
+                    className="card-img-top rounded-top-4"
+                    style={{ height: "180px", objectFit: "cover" }}
+                  />
+                  <div className="card-body d-flex flex-column">
+                    <h5 className="card-title text-primary fw-bold">{room.room_type || "Tipo no definido"}</h5>
+                    <p className="card-text text-muted">{room.description || "Sin descripción"}</p>
+                    <span className="badge bg-success mb-3 fs-6">
+                      <i className="bi bi-cash-coin me-1"></i>
+                      {room.price.toLocaleString("es-MX", { style: "currency", currency: "MXN" })} por noche
+                    </span>
 
-          return (
-            <div key={room.id} className="col">
-              <div
-                className="card shadow-sm border-0 rounded-4"
-                style={{ maxWidth: "360px", margin: "0 auto", height: "100%" }}
-              >
-                <img
-                  src={`/images/${room.image}`}
-                  alt={room.room_type}
-                  className="card-img-top rounded-top-4"
-                  style={{ height: "180px", objectFit: "cover" }}
-                />
-                <div className="card-body d-flex flex-column" style={{ minHeight: "300px" }}>
-                  <h5 className="card-title fw-bold">{room.room_type}</h5>
-                  <p className="card-text text-muted" style={{ fontSize: "0.9rem" }}>{room.description}</p>
-                  <span className="badge text-bg-success mb-3 p-2">
-                    <i className="bi bi-currency-dollar"></i> {room.price} por noche
-                  </span>
+                    {alert.show && (
+                      <div className={`alert alert-${alert.type} d-flex align-items-center`} role="alert">
+                        <i className={`bi bi-exclamation-circle-fill me-2`}></i>
+                        {alert.message}
+                      </div>
+                    )}
 
-                  <form onSubmit={(e) => handleBooking(e, room.id)} style={{ flex: 1 }}>
-                    <div className="mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Nombre del huésped"
-                        value={formData.guest_name || ""}
-                        onChange={(e) => handleInputChange(room.id, "guest_name", e.target.value)}
-                      />
-                    </div>
-                    <div className="mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Teléfono del huésped"
-                        value={formData.guest_phone || ""}
-                        onChange={(e) => handleInputChange(room.id, "guest_phone", e.target.value)}
-                      />
-                    </div>
-                    <div className="d-flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="Nombre del huésped"
+                      value={guest_name}
+                      onChange={(e) => handleInputChange(room.id, "guest_name", e.target.value)}
+                    />
+
+                    <input
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="Número telefónico"
+                      value={guest_phone}
+                      onChange={(e) => handleInputChange(room.id, "guest_phone", e.target.value)}
+                    />
+
+                    <div className="mb-3">
                       <input
                         type="date"
                         className="form-control"
-                        value={formData.check_in_date || ""}
+                        value={check_in_date}
                         onChange={(e) => handleInputChange(room.id, "check_in_date", e.target.value)}
                       />
+                    </div>
+
+                    <div className="mb-3">
                       <input
                         type="date"
                         className="form-control"
-                        value={formData.check_out_date || ""}
+                        value={check_out_date}
                         onChange={(e) => handleInputChange(room.id, "check_out_date", e.target.value)}
                       />
                     </div>
 
-                    {nights > 0 && (
-                      <div className="alert alert-info p-2 mb-2">
-                        <small className="d-block">
-                          <i className="bi bi-moon-fill"></i> Noches: <strong>{nights}</strong>
-                        </small>
-                        <small className="d-block">
-                          <i className="bi bi-cash-coin"></i> Total: <strong>${total}</strong>
-                        </small>
-                      </div>
-                    )}
+                    <div className="d-flex justify-content-between">
+                      <p className="text-muted">
+                        Noches: <span className="fw-bold">{nights}</span>
+                      </p>
+                      <p className="text-muted">
+                        Total: <span className="fw-bold">{total_price.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}</span>
+                      </p>
+                    </div>
 
-                    {messageByRoom[room.id] && (
-                      <div className="alert alert-danger text-center p-2">
-                        {messageByRoom[room.id]}
-                      </div>
-                    )}
-
-                    <button type="submit" className="btn btn-primary w-100 mt-2">
-                      <i className="bi bi-check-circle me-2"></i> Reservar
+                    <button
+                      className="btn btn-primary mt-auto"
+                      onClick={() => handleBooking(room.id)}
+                    >
+                      Confirmar reserva
                     </button>
-                  </form>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

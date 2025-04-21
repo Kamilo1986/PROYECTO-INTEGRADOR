@@ -161,7 +161,8 @@ const Hotels = () => {
               {filteredHotels.map((hotel) => (
                 <div className="col-md-4 mb-4" key={hotel.id}>
                   <div className="card h-100 shadow-sm" style={{ maxWidth: "300px", margin: "0 auto", display: "flex", flexDirection: "column" }}>
-                    <img src={`/images/${hotel.image}`} alt={hotel.name} className="card-img-top" style={{ height: "150px", objectFit: "cover", borderRadius: "8px" }} />
+                  <img src={`${process.env.PUBLIC_URL}/images/${hotel.image}`} alt={hotel.name} className="card-img-top" style={{ height: "150px", objectFit: "cover", borderRadius: "8px" }} />
+
                     <div className="card-body" style={{ padding: "15px", flexGrow: 1 }}>
                       <h5 className="card-title" style={{ fontSize: "18px", fontWeight: "bold" }}>
                         {hotel.name}
