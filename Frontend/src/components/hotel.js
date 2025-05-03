@@ -16,7 +16,7 @@ const Hotels = () => {
 
     const fetchHotels = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/hotels`);
+        const response = await fetch(`https://proyecto-integrador-1-oytp.onrender.com /api/hotels`);
         const data = await response.json();
 
         const updatedHotels = data.map((hotel, index) => ({

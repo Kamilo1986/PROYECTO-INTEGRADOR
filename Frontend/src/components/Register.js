@@ -91,7 +91,7 @@ const Register = () => {
 
     try {
       // Hacer la solicitud POST al backend
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
+      const response = await fetch(`https://proyecto-integrador-1-oytp.onrender.com/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
