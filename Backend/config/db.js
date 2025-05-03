@@ -8,10 +8,13 @@ const db = mysql.createPool({
     host: process.env.DB_HOST,  // Por ejemplo, 'localhost' o el host del servicio de base de datos
     user: process.env.DB_USER,  // El nombre de usuario para la base de datos
     password: process.env.DB_PASSWORD,  // La contraseña de la base de datos
-    database: process.env.DB_NAME,  // El nombre de la base de datos a la que te conectas
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306,  // El nombre de la base de datos a la que te conectas
     waitForConnections: true,  // Permite que las conexiones se pongan en espera si el pool está lleno
-    connectionLimit: 10,  // Limita la cantidad de conexiones simultáneas en el pool
-    queueLimit: 0  // Sin límite para la cola de conexiones, ajusta según sea necesario
+    connectionLimit: 0,  // Limita la cantidad de conexiones simultáneas en el pool
+    queueLimit: 0,
+    connectTimeout: 10000
+    // Sin límite para la cola de conexiones, ajusta según sea necesario
 });
 
 // Verificar la conexión a la base de datos al iniciar la aplicación

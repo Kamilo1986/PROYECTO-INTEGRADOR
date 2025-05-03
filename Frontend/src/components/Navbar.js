@@ -9,9 +9,12 @@ const Navbar = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const weatherAPIUrl = "https://api.openweathermap.org/data/2.5/weather?q=New%20York&appid=58ddef881a6f75c780ff7b9ad3d47dc2&units=metric";
-  const exchangeAPIUrl = "https://v6.exchangerate-api.com/v6/081e4cba9282d00407ec5335/latest/USD";
-  const newsAPIUrl = "https://newsapi.org/v2/top-headlines?country=us&apiKey=89c4c3a9e7d44992988dd190d2ab442d";
+  const weatherAPIUrl =
+    "https://api.openweathermap.org/data/2.5/weather?q=New%20York&appid=58ddef881a6f75c780ff7b9ad3d47dc2&units=metric";
+  const exchangeAPIUrl =
+    "https://v6.exchangerate-api.com/v6/081e4cba9282d00407ec5335/latest/USD";
+  const newsAPIUrl =
+    "https://newsapi.org/v2/top-headlines?country=us&apiKey=89c4c3a9e7d44992988dd190d2ab442d";
 
   const isAuthenticated = localStorage.getItem("token");
 
@@ -20,7 +23,6 @@ const Navbar = () => {
     navigate("/login");
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -65,14 +67,19 @@ const Navbar = () => {
       <nav className="navbar navbar-expand-lg navbar-dark bg-primary px-4">
         <div className="container-fluid">
           <span
-            className="navbar-brand"
+            className="navbar-brand d-flex align-items-center"
             style={{ cursor: "pointer", fontWeight: "bold", fontSize: "24px" }}
             onClick={() => navigate("/")}
           >
             <img
-              src="./logo.png"
+          src={`${process.env.PUBLIC_URL}/logo.png`} 
               alt="Tu Hotel"
-              style={{ width: "50px", marginRight: "10px", borderRadius: "50%" }}
+              style={{
+                width: "50px",
+                marginRight: "10px",
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
             />
             Tu Hotel
           </span>
@@ -93,12 +100,14 @@ const Navbar = () => {
             <ul className="navbar-nav ms-auto">
               {isAuthenticated && (
                 <li className="nav-item">
-                  <Link className="nav-link" to="/reservas">Mis Reservas</Link>
+                  <Link className="btn btn-outline-light rounded-pill ms-2" to="/reservas">
+                    Mis Reservas
+                  </Link>
                 </li>
               )}
               <li className="nav-item">
                 <button
-                  className="btn btn-outline-light rounded-pill"
+                  className="btn btn-outline-light rounded-pill ms-2"
                   onClick={handleLogout}
                 >
                   Cerrar sesión
@@ -112,7 +121,8 @@ const Navbar = () => {
       <div
         className="d-flex justify-content-center align-items-center text-white"
         style={{
-          backgroundImage: "url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDc0cWVjOHM1MDQzYnE2YTg4aW1lZHJoYmEyMTdxODJsanQ0dnFiMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif')",
+          backgroundImage:
+            "url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExbDc0cWVjOHM1MDQzYnE2YTg4aW1lZHJoYmEyMTdxODJsanQ0dnFiMCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/7AtHoQ9XWbpwLRxs0t/giphy.gif')",
           backgroundSize: "cover",
           backgroundPosition: "center",
           height: "120px",
@@ -126,7 +136,9 @@ const Navbar = () => {
       >
         <div style={{ whiteSpace: "nowrap", animation: "scrollText 30s linear infinite" }}>
           {weather ? (
-            <span>Clima: {weather.weather[0].description}, {weather.main.temp}°C | </span>
+            <span>
+              Clima: {weather.weather[0].description}, {weather.main.temp}°C |{" "}
+            </span>
           ) : (
             <span>{error || "Cargando clima..."} | </span>
           )}

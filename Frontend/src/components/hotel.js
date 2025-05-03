@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
+import React, { useState, useEffect } from "react"; // Add useState and useEffect imports
+import { useNavigate } from "react-router-dom"; // Add useNavigate import
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { Spinner } from 'react-bootstrap';
-
+import { Spinner } from 'react-bootstrap'; // Add Spinner import
 const Hotels = () => {
   const [hotels, setHotels] = useState([]);
   const [filteredHotels, setFilteredHotels] = useState([]);
@@ -13,18 +12,16 @@ const Hotels = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Definir calificaciones dentro del useEffect
-    const ratings = [4.1, 4.2, 4.3, 4.4, 4.5]; // 5 calificaciones predefinidas
+    const ratings = [4.1, 4.2, 4.3, 4.4, 4.5];
 
     const fetchHotels = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/hotels`);
         const data = await response.json();
 
-        // Asignar las calificaciones de manera cíclica a las tarjetas de hotel
         const updatedHotels = data.map((hotel, index) => ({
           ...hotel,
-          rating: ratings[index % ratings.length], // Ciclamos las calificaciones para asignarlas a las tarjetas
+          rating: ratings[index % ratings.length],
         }));
 
         setHotels(updatedHotels);
@@ -37,7 +34,7 @@ const Hotels = () => {
     };
 
     fetchHotels();
-  }, []); // Mantener las dependencias del useEffect vacías
+  }, []);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -53,26 +50,21 @@ const Hotels = () => {
 
   const applyFilters = (newFilters) => {
     let filtered = [...hotels];
-
-    // Filtrar por nombre
+    
     if (newFilters.name) {
       filtered = filtered.filter((hotel) =>
         hotel.name.toLowerCase().includes(newFilters.name.toLowerCase())
       );
     }
 
-    // Filtrar por precio
     if (newFilters.price) {
-      const selectedPrice = parseFloat(newFilters.price); // Convertir el precio seleccionado a número flotante
-
-      // Filtrar solo aquellos hoteles cuyo precio es exactamente igual al valor del filtro
+      const selectedPrice = parseFloat(newFilters.price);
       filtered = filtered.filter((hotel) => parseFloat(hotel.price_per_night) === selectedPrice);
     }
 
-    // Filtrar por calificación exacta
     if (newFilters.rating) {
-      const selectedRating = parseFloat(newFilters.rating); // Asegurarnos de que sea un número flotante
-      filtered = filtered.filter((hotel) => parseFloat(hotel.rating) === selectedRating); // Comparar exactamente la calificación
+      const selectedRating = parseFloat(newFilters.rating);
+      filtered = filtered.filter((hotel) => parseFloat(hotel.rating) === selectedRating);
     }
 
     setFilteredHotels(filtered);
@@ -101,18 +93,29 @@ const Hotels = () => {
     return stars.join(" ");
   };
 
-  // Generar precios únicos para los filtros
   const uniquePrices = [...new Set(hotels.map(hotel => parseFloat(hotel.price_per_night).toFixed(2)))];
-
-  const uniqueHotelNames = [...new Set(hotels.map(hotel => hotel.name))]; // Filtrar los nombres duplicados
+  const uniqueHotelNames = [...new Set(hotels.map(hotel => hotel.name))];
 
   return (
     <>
-      <Navbar />
-      <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100" style={{ background: "linear-gradient(to right, #6a11cb, #2575fc)", backgroundSize: "cover" }}>
+      {/* Fondo en toda la pantalla */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "linear-gradient(to right, #6a11cb, #2575fc)",
+          zIndex: -1,
+        }}
+      />
+  
+      {/* Contenido principal */}
+      <div className="container-fluid d-flex justify-content-center align-items-center min-vh-100">  
         <div className="col-md-8 bg-white p-4 shadow rounded">
           <h2 className="text-center text-primary mb-4">Hoteles Disponibles</h2>
-
+  
           {/* Filtros */}
           <div className="row mb-3">
             <div className="col-md-3">
@@ -145,7 +148,7 @@ const Hotels = () => {
               </button>
             </div>
           </div>
-
+  
           {/* Spinner de carga */}
           {loading ? (
             <div className="d-flex justify-content-center align-items-center" style={{ height: "300px" }}>
@@ -161,12 +164,9 @@ const Hotels = () => {
               {filteredHotels.map((hotel) => (
                 <div className="col-md-4 mb-4" key={hotel.id}>
                   <div className="card h-100 shadow-sm" style={{ maxWidth: "300px", margin: "0 auto", display: "flex", flexDirection: "column" }}>
-                  <img src={`${process.env.PUBLIC_URL}/images/${hotel.image}`} alt={hotel.name} className="card-img-top" style={{ height: "150px", objectFit: "cover", borderRadius: "8px" }} />
-
+                    <img src={`${process.env.PUBLIC_URL}/images/${hotel.image}`} alt={hotel.name} className="card-img-top" style={{ height: "150px", objectFit: "cover", borderRadius: "8px" }} />
                     <div className="card-body" style={{ padding: "15px", flexGrow: 1 }}>
-                      <h5 className="card-title" style={{ fontSize: "18px", fontWeight: "bold" }}>
-                        {hotel.name}
-                      </h5>
+                      <h5 className="card-title" style={{ fontSize: "18px", fontWeight: "bold" }}>{hotel.name}</h5>
                       <p className="card-text" style={{ fontSize: "14px" }}>
                         <i className="bi bi-geo-alt-fill me-2"></i>
                         {hotel.location}
@@ -191,7 +191,7 @@ const Hotels = () => {
               ))}
             </div>
           )}
-
+  
           {/* Botón Volver */}
           <div className="text-center mt-4">
             <button className="btn btn-outline-primary" onClick={handleBack}>
@@ -202,6 +202,6 @@ const Hotels = () => {
       </div>
     </>
   );
-};
+};      
 
-export default Hotels;
+export default Hotels;  

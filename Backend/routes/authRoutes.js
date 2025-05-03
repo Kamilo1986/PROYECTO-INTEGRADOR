@@ -58,9 +58,7 @@ router.post(
         'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
         [name, normalizedEmail, hashedPassword, 'user']
       );
-      console.log('Resultado de la inserción:', result); 
 
-      // Verificar si se insertó correctamente
       if (result && result.affectedRows > 0) {
         const newUser = {
           id: result.insertId,
@@ -87,6 +85,7 @@ router.post(
 // 🚀 INICIO DE SESIÓN (LOGIN)
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+  console.log("Datos recibidos en el backend:", req.body);
 
   // Validar que los campos no estén vacíos
   if (!email || !password) {
@@ -100,7 +99,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Usuario no encontrado' });
     }
 
-    // Comprobamos si las contraseñas coinciden
+    // Comparar la contraseña ingresada con la que está en la base de datos
     const isMatch = await bcrypt.compare(password, user[0].password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Contraseña incorrecta' });
@@ -110,8 +109,9 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign(
       { id: user[0].id, role: user[0].role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '1d' }
     );
+    console.log("Rol del usuario:", user[0].role);
 
     return res.json({
       message: 'Inicio de sesión exitoso',

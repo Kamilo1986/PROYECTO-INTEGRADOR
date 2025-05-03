@@ -15,16 +15,20 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
-  
+
+    // Verificar si los campos están vacíos
     if (!email || !password) {
       setMessage("Por favor, completa todos los campos.");
       setLoading(false);
       return;
     }
-  
+
     const normalizedEmail = email.trim().toLowerCase();
-  
+
     try {
+      // Verificar la solicitud que se envía
+      console.log("Datos enviados al servidor:", { email: normalizedEmail, password });
+
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
@@ -32,24 +36,29 @@ const Login = () => {
         },
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
-  
+
       const data = await response.json();
-  
-      // Verifica la respuesta en la consola
+
+      // Verificar la respuesta en la consola
       console.log("Respuesta del servidor:", data);  // Verifica el contenido de `data`
-  
+      
       if (response.ok) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("user_id", data.user.id);  // Guardamos el user_id
-        
+        localStorage.setItem("hotel_id", data.user.hotel_id);  
         const role = data.user.role?.toLowerCase();
+
+        // Verificar el rol del usuario
+        console.log("Rol del usuario:", role);
+
         if (role === "admin") {
           navigate("/admin");
         } else {
           navigate("/hotel");
         }
       } else {
+        console.log("Error en login:", data.message);
         setMessage(data.message || "Error en el login. Verifica tus credenciales.");
       }
     } catch (error) {
@@ -59,7 +68,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-  
 
   return (
     <div
@@ -80,7 +88,7 @@ const Login = () => {
         />
 
         <h2 className="mb-4">
-          Bienvenido a <span className="text-primary">Tu Hotel</span>
+          <span className="text-white">Bienvenido a Tu Hotel</span>
         </h2>
 
         {message && <div className="alert alert-danger">{message}</div>}
@@ -122,7 +130,7 @@ const Login = () => {
         </form>
 
         <button
-          className="btn btn-link text-primary"
+          className="btn btn-link text-white"
           onClick={goToRegister}
         >
           ¿No tienes cuenta? Regístrate

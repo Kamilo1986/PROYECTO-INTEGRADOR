@@ -96,7 +96,8 @@ const createReservation = async (req, res) => {
       console.log(`No se encontró la habitación con ID: ${room_id}`);
       return res.status(404).json({ message: "Habitación no encontrada" });
     }
-
+const rooms = room[0];
+console.log('Habitación:', room.room_type, room.description); // Verificación de los valores de room_type y description
     // Verificar si el hotel existe
     const [hotel] = await db.execute('SELECT * FROM hotels WHERE id = ?', [hotel_id]);
     console.log('Hotel encontrado:', hotel);
@@ -112,9 +113,10 @@ const createReservation = async (req, res) => {
 
     // Guardamos la reserva con el total proporcionado
     const [result] = await db.execute(
-      'INSERT INTO reservations (reservation_code, guest_name, guest_phone, check_in_date, check_out_date, room_id, hotel_id, user_id, total_price, status, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [reservation_code, guest_name, guest_phone, formattedCheckIn, formattedCheckOut, room_id, hotel_id, user_id, total_price, 'activa', image || null]
-  );
+      'INSERT INTO reservations (reservation_code, guest_name, guest_phone, check_in_date, check_out_date, room_id, hotel_id, user_id, total_price, status, image, room_type, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [reservation_code, guest_name, guest_phone, formattedCheckIn, formattedCheckOut, room_id, hotel_id, user_id, total_price, 'activa', image, rooms.room_type, rooms.description || null]
+    );
+    
   
     console.log('Reserva insertada, ID:', result.insertId);
 
@@ -127,6 +129,13 @@ const createReservation = async (req, res) => {
       message: "Reserva creada correctamente",
       reservation_code: reservation[0].reservation_code,
       guest_name: reservation[0].guest_name,
+      guest_phone: reservation[0].guest_phone,
+      room_id: reservation[0].room_id,
+      hotel_id: reservation[0].hotel_id,
+      user_id: reservation[0].user_id,
+      status: reservation[0].status,
+      room_type: reservation[0].room_type,
+      description: reservation[0].description,
       check_in_date: reservation[0].check_in_date,
       check_out_date: reservation[0].check_out_date,
       total_price: reservation[0].total_price,

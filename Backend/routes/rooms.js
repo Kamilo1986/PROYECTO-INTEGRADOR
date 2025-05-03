@@ -37,8 +37,8 @@ router.get('/:hotelId/available', async (req, res) => {
   }
 
   try {
-    // Reemplazamos la consulta para obtener el precio, imagen y descripción
-    const query = 'SELECT id, room_type, price, image, description FROM rooms WHERE hotel_id = ? AND available = 1';
+    // ✅ Agregar LIMIT 4 para devolver solo 4 habitaciones por hotel
+    const query = 'SELECT id, room_type, price, image, description FROM rooms WHERE hotel_id = ? AND available = 1 LIMIT 4';
     const [rooms] = await db.query(query, [hotelId]);
 
     if (rooms.length > 0) {
