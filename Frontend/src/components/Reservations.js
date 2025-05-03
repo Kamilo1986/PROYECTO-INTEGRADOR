@@ -86,7 +86,7 @@ const Reservations = () => {
     }
 
     setFilteredReservations(filtered);
-  }, [filterStatus, filterCheckIn, filterGuest, filterPhone, filterCode, reservations]);
+  }, [filterStatus, filterCheckIn, filterCheckOut, filterGuest, filterPhone, filterCode, reservations]);
 
   const handleDeleteReservation = async (id) => {
     const token = localStorage.getItem('token');

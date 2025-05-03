@@ -11,7 +11,7 @@ const db = mysql.createPool({
     database: process.env.DB_NAME,
     port: process.env.DB_PORT || 3306,  // El nombre de la base de datos a la que te conectas
     waitForConnections: true,  // Permite que las conexiones se pongan en espera si el pool está lleno
-    connectionLimit: 0,  // Limita la cantidad de conexiones simultáneas en el pool
+    connectionLimit: 5,  // Limita la cantidad de conexiones simultáneas en el pool
     queueLimit: 0,
     connectTimeout: 10000
     // Sin límite para la cola de conexiones, ajusta según sea necesario
