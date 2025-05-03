@@ -1,7 +1,7 @@
 {
   "name": "tu-hotel-backend",
   "version": "1.0.0",
-  "homepage": "/PROYECTO-INTEGRADOR",
+  "homepage": "",
   "description": "Backend para el sistema de reservas 'Tu Hotel'",
   "main": "server.js",
   "scripts": {
