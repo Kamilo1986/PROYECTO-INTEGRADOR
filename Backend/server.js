@@ -28,7 +28,7 @@ for (const key of requiredEnv) {
   }
 }
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001','https://proyecto-integrador-3-aa6i.onrender.com'];
 
 app.use(cors({
   origin: function (origin, callback) {
