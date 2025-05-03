@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Importamos los íconos
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Estado para manejar si se muestra la contraseña
   const navigate = useNavigate();
 
   const goToRegister = () => navigate("/register");
@@ -78,10 +80,9 @@ const Login = () => {
         height: "100vh",
       }}
     >
-      {/* Todo el contenido dentro de un contenedor principal */}
       <div className="text-center">
         <img
-          src={`${process.env.PUBLIC_URL}/logo.png`}  // Utiliza PUBLIC_URL para referenciar correctamente
+          src={`${process.env.PUBLIC_URL}/logo.png`} // Usa PUBLIC_URL para asegurar que la ruta sea correcta
           alt="Logo de Tu Hotel"
           className="mb-4"
           style={{ width: "150px", height: "auto" }}
@@ -107,18 +108,26 @@ const Login = () => {
               required
             />
           </div>
-          <div className="mb-3">
+          <div className="mb-3 position-relative">
             <label htmlFor="password" className="form-label">
               Contraseña
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"} // Condicional para mostrar/ocultar la contraseña
               className="form-control"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              className="position-absolute top-50 end-0 translate-middle-y me-3"
+              style={{ background: "transparent", border: "none" }}
+              onClick={() => setShowPassword(!showPassword)} // Alternar entre mostrar/ocultar
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}  {/* Icono de ojo */}
+            </button>
           </div>
           <button
             type="submit"
