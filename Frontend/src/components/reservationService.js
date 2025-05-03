@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://proyecto-integrador-1-oytp.onrender.com/api/reservations";
+const API_BASE_URL = "http://localhost:5000/api/reservations";
 
 // ✅ Crear reserva
 export const createReservation = async (reservationData, token) => {

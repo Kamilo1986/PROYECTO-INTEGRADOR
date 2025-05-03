@@ -29,7 +29,7 @@ const Login = () => {
       // Verificar la solicitud que se envía
       console.log("Datos enviados al servidor:", { email: normalizedEmail, password });
 
-      const response = await fetch(`https://proyecto-integrador-1-oytp.onrender.com/api/auth/login`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

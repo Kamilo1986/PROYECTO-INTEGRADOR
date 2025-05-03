@@ -19,7 +19,7 @@ const Booking = () => {
           return; // Si no hay token, no hacemos nada
         }
 
-        const response = await fetch("https://proyecto-integrador-1-oytp.onrender.com /api/rooms/", {
+        const response = await fetch("http://localhost:5000/api/rooms/", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -152,7 +152,7 @@ const Booking = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("https://proyecto-integrador-1-oytp.onrender.com /api/reservation", {
+      const response = await fetch("http://localhost:5000/api/reservation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

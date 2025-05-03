@@ -91,7 +91,7 @@ const Register = () => {
 
     try {
       // Hacer la solicitud POST al backend
-      const response = await fetch(`https://proyecto-integrador-1-oytp.onrender.com/api/auth/register`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ const Register = () => {
       <Row className="w-100">
         <Col md={6} className="mx-auto">
           <div className="text-center mb-4">
-            <img src={`${process.env.PUBLIC_URL}/logo.png`} alt="Logo" />
+            <img src={`${process.env.PUBLIC_URL}/logo.png`} />
             <h1>Crear Cuenta</h1>
           </div>
           <Form onSubmit={handleSubmit} className="form-container">

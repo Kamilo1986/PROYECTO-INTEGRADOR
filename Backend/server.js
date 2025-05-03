@@ -33,7 +33,7 @@ const allowedOrigins = [
   'http://localhost:3001',
   'https://proyecto-integrador-3-aa6i.onrender.com',
   process.env.FRONTEND_URL, 
-  'http://192.168.1.8:3000'  // Verifica que esta URL sea correcta
+   // Verifica que esta URL sea correcta
 ];
 
 
@@ -64,6 +64,11 @@ app.use('/api/reservation', reservationRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api', misReservasRoutes); // ✅ NUEVA RUTA
+// Servir archivos estáticos de React
+// Servir archivos estáticos de React
+app.use(express.static(path.join(__dirname, 'build')));
+
+
 
 app.use((req, res) => {
   res.status(404).json({ message: 'Ruta no encontrada' });
