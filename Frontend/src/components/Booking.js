@@ -19,7 +19,7 @@ const Booking = () => {
           return; // Si no hay token, no hacemos nada
         }
 
-        const response = await fetch("http://localhost:5000/api/rooms/", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/rooms`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -144,7 +144,6 @@ const Booking = () => {
       user_id: localStorage.getItem("user_id"),
       image: formData.image || null,
       status: "pending",
-   
     };
 
     console.log("handleBooking - Datos de la reserva a enviar:", datosReserva);
@@ -152,7 +151,7 @@ const Booking = () => {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/reservation", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/reservation`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

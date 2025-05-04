@@ -37,7 +37,7 @@ const Admin = () => {
 
     const fetchReservas = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/reservation/all", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/reservation/all`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -64,7 +64,7 @@ const Admin = () => {
 
   const cancelarReserva = async (id) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/reservation/cancel/${id}`, {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/reservation/cancel/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

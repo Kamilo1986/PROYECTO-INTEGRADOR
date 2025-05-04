@@ -144,6 +144,12 @@ const Login = () => {
         >
           ¿No tienes cuenta? Regístrate
         </button>
+        {/* Link de reestablecer contraseña */}
+        <div className="text-center mt-3">
+            <a href="/reestablecer-contrasena" className="text-decoration-none text-muted">
+              <i className="bi bi-shield-lock me-2"></i>¿Olvidaste tu contraseña?
+            </a>
+        </div>
       </div>
     </div>
   );
