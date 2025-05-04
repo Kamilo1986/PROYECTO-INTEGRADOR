@@ -257,6 +257,27 @@ const Reservations = () => {
             </div>
           );
         })}
+        <button
+  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  className="btn btn-light position-fixed d-flex align-items-center justify-content-center"
+  style={{
+    bottom: '20px',
+    right: '20px',
+    borderRadius: '50%',
+    width: '55px',
+    height: '55px',
+    zIndex: 1000,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.3s ease',
+  }}
+  onMouseOut={(e) => {
+    e.currentTarget.style.transform = 'scale(1)';
+  }}
+  title="Volver arriba"
+>
+  <i className="bi bi-arrow-up fs-4 text-primary"></i>
+</button>
+
       </div>
     </div>
   );

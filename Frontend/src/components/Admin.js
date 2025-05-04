@@ -9,7 +9,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import "../index.css";
-
 const Admin = () => {
   const [reservas, setReservas] = useState([]);
   const [mensaje, setMensaje] = useState("");
@@ -82,44 +81,82 @@ const Admin = () => {
       alert("Error al cancelar la reserva.");
     }
   };
+  const getQRCodeImageData = (id) => {
+    const svg = document.getElementById(id);
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const img = new Image();
 
-  const imprimirReserva = (reserva) => {
-    const ventana = window.open("", "_blank");
-    ventana.document.write(`
-      <html><head><title>Reserva ${reserva.reservation_code}</title><style>
-        body { font-family: Arial; padding: 20px; }
-        h2 { color: #007bff; }
-        p { margin: 5px 0; }
-      </style></head><body>
-      <h2>Detalles de la Reserva</h2>
-      <p><strong>Código:</strong> ${reserva.reservation_code}</p>
-      <p><strong>Hotel:</strong> ${reserva.hotel}</p>
-      <p><strong>Habitación:</strong> ${reserva.room_type}</p>
-      <p><strong>Nombre:</strong> ${reserva.guest_name}</p>
-      <p><strong>Teléfono:</strong> ${reserva.guest_phone}</p>
-      <p><strong>Check-in:</strong> ${reserva.check_in_date}</p>
-      <p><strong>Check-out:</strong> ${reserva.check_out_date}</p>
-      <p><strong>Noches:</strong> ${reserva.nights}</p>
-      <p><strong>Precio total:</strong> $${reserva.total_price}</p>
-      </body></html>`);
-    ventana.document.close();
-    ventana.print();
+    return new Promise((resolve, reject) => {
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = reject;
+      img.src = "data:image/svg+xml;base64," + btoa(svgData);
+    });
   };
-
-  const generarPDF = (reserva) => {
-    const doc = new jsPDF();
-    doc.text(`Reserva: ${reserva.reservation_code}`, 10, 10);
-    doc.text(`Hotel: ${reserva.hotel}`, 10, 20);
-    doc.text(`Tipo de habitación: ${reserva.room_type}`, 10, 30);
-    doc.text(`Nombre del huésped: ${reserva.guest_name}`, 10, 40);
-    doc.text(`Teléfono: ${reserva.guest_phone}`, 10, 50);
-    doc.text(`Check-in: ${reserva.check_in_date}`, 10, 60);
-    doc.text(`Check-out: ${reserva.check_out_date}`, 10, 70);
-    doc.text(`Noches: ${reserva.nights}`, 10, 80);
-    doc.text(`Precio total: $${reserva.total_price}`, 10, 90);
-    doc.save(`reserva_${reserva.reservation_code}.pdf`);
+  const imprimirReserva = async (reserva) => {
+    try {
+      const qrImage = await getQRCodeImageData(`qr-${reserva.reservation_code}`);
+      const ventana = window.open("", "_blank");
+  
+      ventana.document.write(`
+        <html>
+          <head>
+            <title>Reserva ${reserva.reservation_code}</title>
+          </head>
+          <body>
+            <h2>Reserva: ${reserva.reservation_code}</h2>
+            <p>Hotel: ${reserva.hotel}</p>
+            <p>Habitación: ${reserva.room_type}</p>
+            <p>Nombre: ${reserva.guest_name}</p>
+            <p>Teléfono: ${reserva.guest_phone}</p>
+            <p>Check-in: ${reserva.check_in_date}</p>
+            <p>Check-out: ${reserva.check_out_date}</p>
+            <p>Noches: ${reserva.nights}</p>
+            <p>Total: $${reserva.total_price}</p>
+            <img src="${qrImage}" width="100" height="100" />
+            <script>
+              window.onload = function() {
+                window.print();
+              }
+            </script>
+          </body>
+        </html>
+      `);
+      ventana.document.close();
+    } catch (err) {
+      console.error("Error al imprimir:", err);
+    }
   };
-
+  
+  
+  const generarPDF = async (reserva) => {
+    try {
+      const qrImage = await getQRCodeImageData(`qr-${reserva.reservation_code}`);
+      const doc = new jsPDF();
+  
+      doc.setFontSize(12);
+      doc.text(`Reserva: ${reserva.reservation_code}`, 10, 10);
+      doc.text(`Hotel: ${reserva.hotel}`, 10, 20);
+      doc.text(`Habitación: ${reserva.room_type}`, 10, 30);
+      doc.text(`Nombre: ${reserva.guest_name}`, 10, 40);
+      doc.text(`Teléfono: ${reserva.guest_phone}`, 10, 50);
+      doc.text(`Check-in: ${reserva.check_in_date}`, 10, 60);
+      doc.text(`Check-out: ${reserva.check_out_date}`, 10, 70);
+      doc.text(`Noches: ${reserva.nights}`, 10, 80);
+      doc.text(`Precio total: $${reserva.total_price}`, 10, 90);
+  
+      doc.addImage(qrImage, "PNG", 10, 100, 50, 50);
+      doc.save(`reserva_${reserva.reservation_code}.pdf`);
+    } catch (err) {
+      console.error("Error al generar PDF:", err);
+    }
+  };
   const reservasFiltradas = reservas.filter((reserva) => {
     const matchEstado = filtro === "todos" || reserva.status === filtro;
     const matchHotel = hotelFiltro === "" || reserva.hotel === hotelFiltro;
@@ -143,11 +180,11 @@ const Admin = () => {
       <div className="d-flex justify-content-center">
   <div className="container mt-4">
     {/* Filtros de Estado */}
-    <div className="d-flex justify-content-center gap-2 mb-4">
+    <div className="d-flex justify-content-center gap-2 flex-wrap mb-4">
       {["activa", "pagada", "eliminada", "pasada", "todos"].map((estado) => (
         <button
           key={estado}
-          className={`btn btn-${estado === "activa" ? "info" : estado === "pagada" ? "warning" : estado === "eliminada" ? "danger" : estado === "pasada" ? "secondary" : "primary"} ${estado === filtro ? "active" : ""}`}
+          className={`btn btn-${estado === "activa" ? "info" : estado === "pagada" ? "warning" : estado === "eliminada" ? "danger" : estado === "pasada" ? "secondary" : "primary"} ${estado === filtro ? "active" : ""} w-auto`}
           onClick={() => setFiltro(estado)}
         >
           {estado.charAt(0).toUpperCase() + estado.slice(1)}
@@ -157,17 +194,22 @@ const Admin = () => {
 
     {/* Filtros de Hotel, Nombre, Teléfono, Código y Fechas */}
     <div className="d-flex flex-wrap gap-3 mb-4">
-      <select className="form-select form-control-sm p-2 w-auto" value={hotelFiltro} onChange={(e) => setHotelFiltro(e.target.value)}>
-        <option value="">Todos los hoteles</option>
-        {hoteles.map((h, i) => <option key={i} value={h}>{h}</option>)}
-      </select>
+    <Select
+  options={[{ value: "", label: "Todos los hoteles" }, ...hoteles.map(h => ({ value: h, label: h }))]}
+  onChange={option => setHotelFiltro(option ? option.value : "")}
+  isClearable
+  placeholder="Hotel"
+  className="w-100 w-md-auto"
+  value={hotelFiltro ? { value: hotelFiltro, label: hotelFiltro } : null}
+/>
+
 
       <Select
         options={nombres.map(n => ({ value: n, label: n }))}
         onChange={option => setNombreFiltro(option ? option.value : "")}
         isClearable
         placeholder="Nombre"
-        className="w-auto form-control-sm p-2"
+        className="w-100 w-md-auto form-control-sm p-2"
       />
 
       <Select
@@ -175,7 +217,7 @@ const Admin = () => {
         onChange={option => setTelefonoFiltro(option ? option.value : "")}
         isClearable
         placeholder="Teléfono"
-        className="w-auto form-control-sm p-2"
+        className="w-100 w-md-auto form-control-sm p-2"
       />
 
       <Select
@@ -183,14 +225,14 @@ const Admin = () => {
         onChange={option => setCodigoFiltro(option ? option.value : "")}
         isClearable
         placeholder="Código"
-        className="w-auto form-control-sm p-2"
+        className="w-100 w-md-auto form-control-sm p-2"
       />
 
       <DatePicker
         selected={checkInFiltro}
         onChange={(date) => setCheckInFiltro(date)}
         placeholderText="Check-in"
-        className="form-control form-control-sm p-2 w-auto"
+        className="form-control form-control-sm p-2 w-100 w-md-auto"
         dateFormat="yyyy-MM-dd"
       />
 
@@ -198,11 +240,11 @@ const Admin = () => {
         selected={checkOutFiltro}
         onChange={(date) => setCheckOutFiltro(date)}
         placeholderText="Check-out"
-        className="form-control form-control-sm p-2 w-auto"
+        className="form-control form-control-sm p-2 w-100 w-md-auto"
         dateFormat="yyyy-MM-dd"
       />
 
-<button className="btn btn-outline-primary rounded-pill" onClick={() => {
+      <button className="btn btn-outline-primary rounded-pill w-100 w-md-auto" onClick={() => {
         setNombreFiltro("");
         setTelefonoFiltro("");
         setCodigoFiltro("");
@@ -245,11 +287,17 @@ const Admin = () => {
                 <strong>Check-out:</strong> {reserva.check_out_date}<br />
                 <strong>Noches:</strong> {reserva.nights}<br />
                 <strong>Precio total:</strong> ${reserva.total_price}
+                <p><strong>Estado:</strong> {reserva.status}</p>
               </p>
 
               <div className="text-center my-3">
-                <QRCodeSVG value={reserva.reservation_code} size={100} />
-              </div>
+  <QRCodeSVG
+    value={reserva.reservation_code}
+    size={100}
+    id={`qr-${reserva.reservation_code}`}
+  />
+</div>
+
 
               <div className="d-flex flex-wrap gap-2 justify-content-center">
                 <button
@@ -281,6 +329,27 @@ const Admin = () => {
         </div>
       ))
     )}
+    <button
+  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+  className="btn btn-light position-fixed d-flex align-items-center justify-content-center"
+  style={{
+    bottom: '20px',
+    right: '20px',
+    borderRadius: '50%',
+    width: '55px',
+    height: '55px',
+    zIndex: 1000,
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.3s ease',
+  }}
+  onMouseOut={(e) => {
+    e.currentTarget.style.transform = 'scale(1)';
+  }}
+  title="Volver arriba"
+>
+  <i className="bi bi-arrow-up fs-4 text-primary"></i>
+</button>
+
   </div>
 </div>
   );
