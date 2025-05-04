@@ -134,68 +134,88 @@ const Admin = () => {
   const hoteles = [...new Set(reservas.map((r) => r.hotel))];
 
   return (
-    <div className="admin-container fade-in">
+    <div className="admin-container fade-in ">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="text-primary">Panel de Administración</h2>
         <LogoutButton />
       </div>
 
-      <div className="mb-3 d-flex flex-wrap gap-2 align-items-center">
-        <div className="btn-group">
-          {["activa", "pagada", "eliminada", "pasada", "todos"].map((estado) => (
-            <button
-              key={estado}
-              className={`btn btn-${estado === "activa" ? "info" : estado === "pagada" ? "warning" : estado === "eliminada" ? "danger" : estado === "pasada" ? "secondary" : "light"}`}
-              onClick={() => setFiltro(estado)}
-            >
-              {estado.charAt(0).toUpperCase() + estado.slice(1)}
-            </button>
-          ))}
-        </div>
+      <div className="d-flex justify-content-center">
+  <div className="container mt-4">
+    {/* Filtros de Estado */}
+    <div className="d-flex justify-content-center gap-2 mb-4">
+      {["activa", "pagada", "eliminada", "pasada", "todos"].map((estado) => (
+        <button
+          key={estado}
+          className={`btn btn-${estado === "activa" ? "info" : estado === "pagada" ? "warning" : estado === "eliminada" ? "danger" : estado === "pasada" ? "secondary" : "primary"} ${estado === filtro ? "active" : ""}`}
+          onClick={() => setFiltro(estado)}
+        >
+          {estado.charAt(0).toUpperCase() + estado.slice(1)}
+        </button>
+      ))}
+    </div>
 
-        <select className="form-select w-auto" value={hotelFiltro} onChange={(e) => setHotelFiltro(e.target.value)}>
-          <option value="">Todos los hoteles</option>
-          {hoteles.map((h, i) => <option key={i} value={h}>{h}</option>)}
-        </select>
+    {/* Filtros de Hotel, Nombre, Teléfono, Código y Fechas */}
+    <div className="d-flex flex-wrap gap-3 mb-4">
+      <select className="form-select form-control-sm p-2 w-auto" value={hotelFiltro} onChange={(e) => setHotelFiltro(e.target.value)}>
+        <option value="">Todos los hoteles</option>
+        {hoteles.map((h, i) => <option key={i} value={h}>{h}</option>)}
+      </select>
 
-        <Select
-          options={nombres.map(n => ({ value: n, label: n }))}
-          onChange={option => setNombreFiltro(option ? option.value : "")}
-          isClearable
-          placeholder="Nombre"
-          className="w-auto"
-        />
+      <Select
+        options={nombres.map(n => ({ value: n, label: n }))}
+        onChange={option => setNombreFiltro(option ? option.value : "")}
+        isClearable
+        placeholder="Nombre"
+        className="w-auto form-control-sm p-2"
+      />
 
-        <Select
-          options={telefonos.map(t => ({ value: t, label: t }))}
-          onChange={option => setTelefonoFiltro(option ? option.value : "")}
-          isClearable
-          placeholder="Teléfono"
-          className="w-auto"
-        />
+      <Select
+        options={telefonos.map(t => ({ value: t, label: t }))}
+        onChange={option => setTelefonoFiltro(option ? option.value : "")}
+        isClearable
+        placeholder="Teléfono"
+        className="w-auto form-control-sm p-2"
+      />
 
-        <Select
-          options={codigos.map(c => ({ value: c, label: c }))}
-          onChange={option => setCodigoFiltro(option ? option.value : "")}
-          isClearable
-          placeholder="Código"
-          className="w-auto"
-        />
+      <Select
+        options={codigos.map(c => ({ value: c, label: c }))}
+        onChange={option => setCodigoFiltro(option ? option.value : "")}
+        isClearable
+        placeholder="Código"
+        className="w-auto form-control-sm p-2"
+      />
 
-        <DatePicker
-          selected={checkInFiltro} onChange={(date) => setCheckInFiltro(date)} placeholderText="Check-in" className="form-control" dateFormat="yyyy-MM-dd" /> <DatePicker selected={checkOutFiltro} onChange={(date) => setCheckOutFiltro(date)} placeholderText="Check-out" className="form-control" dateFormat="yyyy-MM-dd" />
-    <button className="btn btn-secondary" onClick={() => {
-      setNombreFiltro("");
-      setTelefonoFiltro("");
-      setCodigoFiltro("");
-      setCheckInFiltro(null);
-      setCheckOutFiltro(null);
-      setHotelFiltro("");
-      setFiltro("todos");
-    }}>
-      Limpiar Filtros
-    </button>
+      <DatePicker
+        selected={checkInFiltro}
+        onChange={(date) => setCheckInFiltro(date)}
+        placeholderText="Check-in"
+        className="form-control form-control-sm p-2 w-auto"
+        dateFormat="yyyy-MM-dd"
+      />
+
+      <DatePicker
+        selected={checkOutFiltro}
+        onChange={(date) => setCheckOutFiltro(date)}
+        placeholderText="Check-out"
+        className="form-control form-control-sm p-2 w-auto"
+        dateFormat="yyyy-MM-dd"
+      />
+
+<button className="btn btn-outline-primary rounded-pill" onClick={() => {
+        setNombreFiltro("");
+        setTelefonoFiltro("");
+        setCodigoFiltro("");
+        setCheckInFiltro(null);
+        setCheckOutFiltro(null);
+        setHotelFiltro("");
+        setFiltro("todos");
+      }}>
+        Limpiar Filtros
+      </button>
+    </div>
   </div>
+</div>
 
   {mensaje && <div className="alert alert-danger">{mensaje}</div>}
 

@@ -96,8 +96,8 @@ const Navbar = () => {
             <span className="navbar-toggler-icon"></span>
           </button>
 
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ms-auto">
+          <div className="collapse navbar-collapse " id="navbarNav">
+            <ul className="navbar-nav ms-auto flex-row ">
               {isAuthenticated && (
                 <li className="nav-item">
                   <Link className="btn btn-outline-light rounded-pill ms-2" to="/reservas">
@@ -107,7 +107,7 @@ const Navbar = () => {
               )}
               <li className="nav-item">
                 <button
-                  className="btn btn-outline-light rounded-pill ms-2"
+                  className="btn btn-outline-light rounded-pill ms-2 "
                   onClick={handleLogout}
                 >
                   Cerrar sesión

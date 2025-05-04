@@ -127,7 +127,7 @@ const Register = () => {
       <Row className="w-100">
         <Col md={6} className="mx-auto">
           <div className="text-center mb-4">
-            <img src={`${process.env.PUBLIC_URL}/logo.png`} />
+            <img src={`${process.env.PUBLIC_URL}/logo.png` } alt="Logo" className="logo" style={{ width: '200px' }} />
             <h1>Crear Cuenta</h1>
           </div>
           <Form onSubmit={handleSubmit} className="form-container">

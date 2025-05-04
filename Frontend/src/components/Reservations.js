@@ -184,50 +184,49 @@ const Reservations = () => {
   };
 
   return (
-    <div className="p-4" style={{ background: 'linear-gradient(to right, #6a11cb, #2575fc)' }}>
+<div className="p-4" style={{ background: 'linear-gradient(to right, #6a11cb, #2575fc)' }}>
       <h2 className="text-white mb-4 text-center">Mis Reservas</h2>
 
-      <div className="d-flex flex-wrap gap-2 mb-3">
+    <div className="d-flex flex-wrap gap-2 mb-4 justify-content-center">
         <button className="btn btn-light btn-sm" onClick={() => handleFilterChange('todos')}>Todos</button>
         <button className="btn btn-success btn-sm w-auto" onClick={() => handleFilterChange('activa')}>Activas</button>
         <button className="btn btn-warning btn-sm" onClick={() => handleFilterChange('vencida')}>Vencidas</button>
         <button className="btn btn-danger btn-sm" onClick={() => handleFilterChange('eliminada')}>Eliminadas</button>
-        <DatePicker selected={filterCheckIn} onChange={setFilterCheckIn} className="form-control mb-2" placeholderText="fecha de entrada" />
-        <DatePicker selected={filterCheckOut}onChange={setFilterCheckOut}className="form-control mb-2"placeholderText="fecha de salida"/>
-        <input type="text" className="form-control mb-3 small w-auto " placeholder="Filtrar por huésped" value={filterGuest} onChange={e => setFilterGuest(e.target.value)} />
-        <input type="text" className="form-control mb-3 small w-auto " placeholder="Filtrar por teléfono" value={filterPhone} onChange={e => setFilterPhone(e.target.value)} />
-        <input type="text" className="form-control mb-3 small w-auto " placeholder="Filtrar por código" value={filterCode} onChange={e => setFilterCode(e.target.value)} />
-        <button
-  className="btn btn-outline-light btn-sm mb-3"
-  onClick={() => {
-    setFilterStatus('todos');
-    setFilterCheckIn(null);
-    setFilterCheckOut(null);
-    setFilterGuest('');
-    setFilterPhone('');
-    setFilterCode('');
+    </div> 
+      <div className="d-flex flex-wrap gap-2 mb-4 justify-content-center">
+        <DatePicker selected={filterCheckIn} onChange={setFilterCheckIn} className="form-control mb-2 text-center" placeholderText="fecha de entrada" />
+        <DatePicker selected={filterCheckOut}onChange={setFilterCheckOut}className="form-control mb-2 text-center"placeholderText="fecha de salida"/>
+        <input type="text" className="form-control mb-3 small w-auto text-center " placeholder="Filtrar por huésped" value={filterGuest} onChange={e => setFilterGuest(e.target.value)} />
+        <input type="text" className="form-control mb-3 small w-auto text-center " placeholder="Filtrar por teléfono" value={filterPhone} onChange={e => setFilterPhone(e.target.value)} />
+        <input type="text" className="form-control mb-3 small w-auto text-center " placeholder="Filtrar por código" value={filterCode} onChange={e => setFilterCode(e.target.value)} />
+        <button className="btn btn-outline-light btn-sm mb-3 "
+        onClick={() => {
+        setFilterStatus('todos');
+        setFilterCheckIn(null);
+        setFilterCheckOut(null);
+        setFilterGuest('');
+        setFilterPhone('');
+        setFilterCode('');
   }}
->
-  Limpiar filtros
-</button>
+>Limpiar filtros</button>
+      
+    </div>
 
-      </div>
-
-      <div className="d-flex flex-wrap gap-3">
+    <div className="d-flex flex-wrap gap-3 justify-content-center">
         {filteredReservations.map((reservation) => {
           const checkIn = new Date(reservation.check_in_date).toLocaleDateString();
           const checkOut = new Date(reservation.check_out_date).toLocaleDateString();
           const nights = Math.ceil((new Date(reservation.check_out_date) - new Date(reservation.check_in_date)) / (1000 * 60 * 60 * 24));
 
           return (
-            <div key={reservation.id} className="card shadow-sm rounded-4" style={{ width: '100%', maxWidth: '600px' }}>
+            <div key={reservation.id} className="card mb-3" style={{ width: '100%', maxWidth: '600px' }}>
               <div className="row g-0">
                 <div className="col-md-4">
                   <img
                     src={reservation.image ? `${process.env.PUBLIC_URL}/images/${reservation.image}` : "/images/default.jpg"}
                     alt="Habitación"
                     className="img-fluid rounded-start-4"
-                    style={{ height: '40%', objectFit: 'cover' }}
+                    style={{ height: '40%', width: '100%', objectFit: 'cover' }}
                   />
                   <div className="d-flex flex-wrap gap-2 p-2">
                     <button className="btn btn-sm btn-primary w-100 me-2 " onClick={() => exportToPDF(reservation)} title="Descargar PDF"><FileDown size={16} />Descargar PDF</button>
