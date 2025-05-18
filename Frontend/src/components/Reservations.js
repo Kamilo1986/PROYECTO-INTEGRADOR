@@ -45,49 +45,52 @@ const Reservations = () => {
 
   useEffect(() => {
     let filtered = reservations;
-
+  
     if (filterStatus !== 'todos') {
       if (filterStatus === 'vencida') {
-        const hoy = new Date();
-        filtered = reservations.filter(res => new Date(res.check_out_date) < hoy && res.status === 'activa');
+        const hoy = new Date(); // Fecha actual
+        filtered = reservations.filter(res => {
+          const checkOutDate = new Date(res.check_out_date);
+          return checkOutDate < hoy && res.status === 'activa'; // Compara fechas como objetos Date
+        });
       } else {
         filtered = reservations.filter(res => res.status === filterStatus);
       }
     }
-
+  
     if (filterCheckIn) {
       filtered = filtered.filter(res =>
         new Date(res.check_in_date).toLocaleDateString() === filterCheckIn.toLocaleDateString()
       );
     }
+  
     if (filterCheckOut) {
       filtered = filtered.filter(res =>
         new Date(res.check_out_date).toLocaleDateString() === filterCheckOut.toLocaleDateString()
       );
     }
-    
-
+  
     if (filterGuest) {
       filtered = filtered.filter(res =>
         res.guest_name.toLowerCase().includes(filterGuest.toLowerCase())
       );
     }
-
+  
     if (filterPhone) {
       filtered = filtered.filter(res =>
         res.guest_phone.includes(filterPhone)
       );
     }
-
+  
     if (filterCode) {
       filtered = filtered.filter(res =>
         res.reservation_code.includes(filterCode)
       );
     }
-
+  
     setFilteredReservations(filtered);
   }, [filterStatus, filterCheckIn, filterCheckOut, filterGuest, filterPhone, filterCode, reservations]);
-
+  
   const handleDeleteReservation = async (id) => {
     const token = localStorage.getItem('token');
     if (!token) return navigate('/login');
@@ -170,15 +173,28 @@ const Reservations = () => {
 
   const handleFilterChange = (status) => setFilterStatus(status);
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'activa': return <CheckCircle size={20} color="green" />;
-      case 'eliminada': return <XCircle size={20} color="red" />;
-      case 'vencida': return <Clock size={20} color="orange" />;
-      default: return null;
+  const getStatusIcon = (status, checkOutDate) => {
+    const hoy = new Date(); // Definir 'hoy' para la comparación
+  
+    // Si el estado es 'activa' y la fecha de salida ha pasado
+    if (status === 'activa' && new Date(checkOutDate) < hoy) {
+      return { icon: <Clock size={20} color="orange" />, label: 'vencida' }; // Cambia el estado a 'vencida'
     }
+  
+    // Si el estado es 'activa', se mantiene el ícono verde
+    if (status === 'activa') {
+      return { icon: <CheckCircle size={20} color="green" />, label: 'activa' };
+    }
+  
+    // Si el estado es 'eliminada', se muestra el ícono rojo
+    if (status === 'eliminada') {
+      return { icon: <XCircle size={20} color="red" />, label: 'eliminada' };
+    }
+  
+    // Si no se cumple ninguno de los casos anteriores, se devuelve un estado vacío
+    return { icon: null, label: status };
   };
-
+  
   const handlePayment = (reservation) => {
     alert(`Pago procesado para la reserva ${reservation.reservation_code} (simulado).`);
   };
@@ -245,7 +261,12 @@ const Reservations = () => {
                     <p className="mb-1"><strong>Salida:</strong> {checkOut}</p>
                     <p className="mb-1"><strong>Noches:</strong> {nights}</p>
                     <p className="mb-1"><strong>Total:</strong> ${reservation.total_price}</p>
-                    <p className="mb-2"><strong>Estado:</strong> {getStatusIcon(reservation.status)} {reservation.status}</p>
+                    <p className="mb-2">
+  <strong>Estado:</strong> 
+  {getStatusIcon(reservation.status, reservation.check_out_date).icon} 
+  {getStatusIcon(reservation.status, reservation.check_out_date).label}
+</p>
+
                     <p className="mb-2"><strong>Código:</strong> {reservation.reservation_code}</p> 
                     <div className="text-center">
                       <h5>QR de la reserva</h5> 
